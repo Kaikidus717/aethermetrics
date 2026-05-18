@@ -2,16 +2,12 @@ package main
 
 import (
 	"context"
-	_ "embed"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"math/big"
-	"net/http"
 	"os"
-	"os/exec"
-	"runtime"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -22,9 +18,6 @@ import (
 	"aethermetrics/internal/rpc"
 	pkgTypes "aethermetrics/pkg/types"
 )
-
-//go:embed dashboard.html
-var dashboardHTML string
 
 func main() {
 	app := &cli.App{
@@ -56,12 +49,6 @@ func main() {
 						Name:  "fuzz-predeclared",
 						Value: true,
 						Usage: "Assume storage slots were pre-declared in EIP-7928 BAL",
-					},
-					&cli.BoolFlag{
-						Name:    "serve",
-						Aliases: []string{"s"},
-						Value:   false,
-						Usage:   "Start a local HTTP server and automatically launch the visual dashboard in your browser",
 					},
 				},
 			},
