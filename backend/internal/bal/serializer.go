@@ -13,10 +13,7 @@ type BALEntry struct {
 	Slots   []common.Hash
 }
 
-func BuildDeterministicBAL(accesses []struct {
-	Address common.Address
-	Slot    common.Hash
-}) []BALEntry {
+func BuildBAL(accesses []AccessEntry) []BALEntry {
 	grouped := make(map[common.Address]map[common.Hash]bool)
 	for _, acc := range accesses {
 		if _, exists := grouped[acc.Address]; !exists {
@@ -25,6 +22,25 @@ func BuildDeterministicBAL(accesses []struct {
 		grouped[acc.Address][acc.Slot] = true
 	}
 
+	return buildSortedEntries(grouped)
+}
+
+func BuildBlockBAL(txsAccesses map[common.Hash][]AccessEntry) []BALEntry {
+	grouped := make(map[common.Address]map[common.Hash]bool)
+
+	for _, accesses := range txsAccesses {
+		for _, acc := range accesses {
+			if _, exists := grouped[acc.Address]; !exists {
+				grouped[acc.Address] = make(map[common.Hash]bool)
+			}
+			grouped[acc.Address][acc.Slot] = true
+		}
+	}
+
+	return buildSortedEntries(grouped)
+}
+
+func buildSortedEntries(grouped map[common.Address]map[common.Hash]bool) []BALEntry {
 	entries := make([]BALEntry, 0, len(grouped))
 	for addr, slotsMap := range grouped {
 		slots := make([]common.Hash, 0, len(slotsMap))

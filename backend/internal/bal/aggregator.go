@@ -19,19 +19,18 @@ type ContentionNode struct {
 	Coordinate StorageCoordinate `json:"coordinate"`
 	TxTouches  []TxAccessSummary `json:"txTouches"`
 	Collision  bool              `json:"collision"`
+	ReadCount  int               `json:"readCount"`
+	WriteCount int               `json:"writeCount"`
 }
 
-type GroupedAccess struct {
-	Coordinate StorageCoordinate
-	Touches    []TxAccessSummary
-}
-
-func DiagnoseContention(txsAccesses map[common.Hash][]struct {
+type AccessEntry struct {
 	Address common.Address
 	Slot    common.Hash
 	IsWrite bool
 	Opcode  string
-}) []ContentionNode {
+}
+
+func DiagnoseContention(txsAccesses map[common.Hash][]AccessEntry) []ContentionNode {
 	slotRegistry := make(map[StorageCoordinate][]TxAccessSummary)
 
 	for txHash, accesses := range txsAccesses {
@@ -54,19 +53,31 @@ func DiagnoseContention(txsAccesses map[common.Hash][]struct {
 	contentionNodes := make([]ContentionNode, 0)
 	for coord, touches := range slotRegistry {
 		isCollision := false
+		readCount := 0
+		writeCount := 0
+
 		if len(touches) > 1 {
-			writeCount := 0
 			uniqueTxs := make(map[common.Hash]bool)
 
 			for _, t := range touches {
 				uniqueTxs[t.TxHash] = true
 				if t.IsWrite {
 					writeCount++
+				} else {
+					readCount++
 				}
 			}
 
 			if len(uniqueTxs) > 1 && writeCount > 0 {
 				isCollision = true
+			}
+		} else {
+			for _, t := range touches {
+				if t.IsWrite {
+					writeCount++
+				} else {
+					readCount++
+				}
 			}
 		}
 
@@ -74,6 +85,8 @@ func DiagnoseContention(txsAccesses map[common.Hash][]struct {
 			Coordinate: coord,
 			TxTouches:  touches,
 			Collision:  isCollision,
+			ReadCount:  readCount,
+			WriteCount: writeCount,
 		})
 	}
 

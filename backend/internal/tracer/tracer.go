@@ -61,6 +61,7 @@ func (t *AetherTracer) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, s
 				Opcode:  opName,
 				PC:      pc,
 				GasCost: cost,
+				Depth:   depth,
 			}
 
 			if op == vm.SSTORE && stack.Len() > 1 {
@@ -83,6 +84,7 @@ func (t *AetherTracer) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, s
 				To:      toAddr,
 				Opcode:  opName,
 				GasCost: cost,
+				Depth:   depth,
 			}
 
 			if (op == vm.CALL || op == vm.CALLCODE) && stack.Len() >= 3 {

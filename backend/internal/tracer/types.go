@@ -14,6 +14,7 @@ type StorageAccess struct {
 	Opcode  string         `json:"opcode"`
 	PC      uint64         `json:"pc"`
 	GasCost uint64         `json:"gasCost"`
+	Depth   int            `json:"depth"`
 }
 
 type AccountTouch struct {
@@ -22,6 +23,7 @@ type AccountTouch struct {
 	Value   *big.Int       `json:"value,omitempty"`
 	Opcode  string         `json:"opcode"`
 	GasCost uint64         `json:"gasCost"`
+	Depth   int            `json:"depth"`
 }
 
 type OpcodeStat struct {
